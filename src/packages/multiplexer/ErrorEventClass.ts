@@ -1,19 +1,21 @@
 import { Event2 } from './Event';
 
 export class ErrorEvent2 extends Event2 implements ErrorEvent {
-    readonly colno: number;
+    static readonly NONE: 0 = 0;
+    
     readonly error: any;
+    readonly message: string;
     readonly filename: string;
     readonly lineno: number;
-    readonly message: string;
+    readonly colno: number;
 
-    constructor(type: string, { colno, error, filename, lineno, message }: ErrorEventInit = {}) {
+    constructor(type: string, { error, message, filename, lineno, colno }: ErrorEventInit = {}) {
         super(type);
         this.error = error;
-        this.colno = colno || 0;
+        this.message = message || '';
         this.filename = filename || '';
         this.lineno = lineno || 0;
-        this.message = message || '';
+        this.colno = colno || 0;
     }
 }
 

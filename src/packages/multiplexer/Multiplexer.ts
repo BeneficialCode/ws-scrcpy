@@ -255,8 +255,21 @@ export class Multiplexer extends TypedEmitter<MultiplexerEvents> implements WebS
         if (this.ws instanceof Multiplexer) {
             if (typeof data === 'string') {
                 data = Message.createBuffer(MessageType.RawStringData, this._id, Buffer.from(data));
-            } else {
+            } else if (data instanceof ArrayBuffer) {
                 data = Message.createBuffer(MessageType.RawBinaryData, this._id, Buffer.from(data));
+            } else if (ArrayBuffer.isView(data)) {
+                const buffer = Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+                data = Message.createBuffer(MessageType.RawBinaryData, this._id, buffer);
+            } else if (data instanceof Blob) {
+                // Convert Blob to ArrayBuffer
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const arrayBuffer = reader.result as ArrayBuffer;
+                    const buffer = Message.createBuffer(MessageType.RawBinaryData, this._id, Buffer.from(arrayBuffer));
+                    this._send(buffer);
+                };
+                reader.readAsArrayBuffer(data);
+                return;
             }
         }
         this._send(data);
@@ -264,7 +277,24 @@ export class Multiplexer extends TypedEmitter<MultiplexerEvents> implements WebS
 
     public sendData(data: string | ArrayBufferLike | Blob | ArrayBufferView): void {
         if (this.ws instanceof Multiplexer) {
-            data = Message.createBuffer(MessageType.Data, this._id, Buffer.from(data));
+            if (typeof data === 'string') {
+                data = Message.createBuffer(MessageType.Data, this._id, Buffer.from(data));
+            } else if (data instanceof ArrayBuffer) {
+                data = Message.createBuffer(MessageType.Data, this._id, Buffer.from(data));
+            } else if (ArrayBuffer.isView(data)) {
+                const buffer = Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+                data = Message.createBuffer(MessageType.Data, this._id, buffer);
+            } else if (data instanceof Blob) {
+                // Convert Blob to ArrayBuffer
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const arrayBuffer = reader.result as ArrayBuffer;
+                    const buffer = Message.createBuffer(MessageType.Data, this._id, Buffer.from(arrayBuffer));
+                    this._send(buffer);
+                };
+                reader.readAsArrayBuffer(data);
+                return;
+            }
         }
         this._send(data);
     }
@@ -275,7 +305,17 @@ export class Multiplexer extends TypedEmitter<MultiplexerEvents> implements WebS
             if (this.ws instanceof Multiplexer) {
                 this.ws.sendData(data);
             } else {
-                this.ws.send(data);
+                if (data instanceof Blob) {
+                    // Convert Blob to ArrayBuffer
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        const arrayBuffer = reader.result as ArrayBuffer;
+                        this.ws.send(arrayBuffer);
+                    };
+                    reader.readAsArrayBuffer(data);
+                } else {
+                    this.ws.send(data);
+                }
             }
         } else if (readyState === this.ws.CONNECTING) {
             this.storage.push(data);

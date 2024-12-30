@@ -74,7 +74,11 @@ export class ShellClient extends ManagerClient<ParamsShell, never> {
         if (!udid || !this.ws || this.ws.readyState !== this.ws.OPEN) {
             return;
         }
-        const { rows, cols } = this.fitAddon.proposeDimensions();
+        const dimensions = this.fitAddon.proposeDimensions();
+        const defaultRows = 24;  // default terminal rows
+        const defaultCols = 80;  // default terminal columns
+        const rows = dimensions?.rows ?? defaultRows;
+        const cols = dimensions?.cols ?? defaultCols;
         const message: MessageXtermClient = {
             id: 1,
             type: 'shell',
@@ -100,18 +104,24 @@ export class ShellClient extends ManagerClient<ParamsShell, never> {
     }
 
     private updateTerminalSize(): void {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const term: any = this.term;
-        const terminalContainer: HTMLElement = ShellClient.getOrCreateContainer(this.escapedUdid);
-        const { rows, cols } = this.fitAddon.proposeDimensions();
-        const width =
-            (cols * term._core._renderService.dimensions.actualCellWidth + term._core.viewport.scrollBarWidth).toFixed(
-                2,
-            ) + 'px';
-        const height = (rows * term._core._renderService.dimensions.actualCellHeight).toFixed(2) + 'px';
-        terminalContainer.style.width = width;
-        terminalContainer.style.height = height;
-        this.fitAddon.fit();
+        if (!this.ws || this.ws.readyState !== this.ws.OPEN) {
+            return;
+        }
+        const dimensions = this.fitAddon.proposeDimensions();
+        if (!dimensions) {
+            return;
+        }
+        const message: MessageXtermClient = {
+            id: 1,
+            type: 'shell',
+            data: {
+                type: 'start',
+                rows: dimensions.rows,
+                cols: dimensions.cols,
+                udid: this.udid,
+            },
+        };
+        this.ws.send(JSON.stringify(message));
     }
 
     public static createEntryForDeviceList(

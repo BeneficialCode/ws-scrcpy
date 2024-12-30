@@ -26,13 +26,20 @@ export abstract class Mw {
     }
 
     protected constructor(protected readonly ws: WS | Multiplexer) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        this.ws.addEventListener('message', this.onSocketMessage.bind(this));
-        this.ws.addEventListener('close', this.onSocketClose.bind(this));
+        if (ws instanceof Multiplexer) {
+            ws.on('message', (event: any) => this.onSocketMessage(event));
+            ws.on('close', () => this.onSocketClose());
+        } else {
+            ws.on('message', (data: any) => this.onSocketMessage({ data } as WS.MessageEvent));
+            ws.on('close', () => this.onSocketClose());
+        }
     }
 
     protected abstract onSocketMessage(event: WS.MessageEvent): void;
+
+    protected onSocketClose(): void {
+        this.release();
+    }
 
     protected sendMessage = (data: Message): void => {
         if (this.ws.readyState !== this.ws.OPEN) {
@@ -40,10 +47,6 @@ export abstract class Mw {
         }
         this.ws.send(JSON.stringify(data));
     };
-
-    protected onSocketClose(): void {
-        this.release();
-    }
 
     public release(): void {
         const { readyState, CLOSED, CLOSING } = this.ws;

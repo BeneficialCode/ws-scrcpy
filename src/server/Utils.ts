@@ -19,6 +19,7 @@ export class Utils {
         };
         Object.keys(os.networkInterfaces())
             .map((key) => os.networkInterfaces()[key])
+            .filter((info): info is os.NetworkInterfaceInfo[] => info !== undefined)
             .forEach((info) => {
                 info.forEach((iface) => {
                     let scopeid: number | undefined;

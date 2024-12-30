@@ -1,8 +1,8 @@
 export class Event2 {
-    static NONE = 0;
-    static CAPTURING_PHASE = 1;
-    static AT_TARGET = 2;
-    static BUBBLING_PHASE = 3;
+    static readonly NONE: 0 = 0;
+    static readonly CAPTURING_PHASE: 1 = 1;
+    static readonly AT_TARGET: 2 = 2;
+    static readonly BUBBLING_PHASE: 3 = 3;
 
     public cancelable: boolean;
     public bubbles: boolean;
@@ -12,10 +12,10 @@ export class Event2 {
     public timeStamp: number;
     public target: any;
     public readonly isTrusted: boolean = true;
-    readonly AT_TARGET: number = 0;
-    readonly BUBBLING_PHASE: number = 0;
-    readonly CAPTURING_PHASE: number = 0;
-    readonly NONE: number = 0;
+    readonly AT_TARGET: 2 = 2;
+    readonly BUBBLING_PHASE: 3 = 3;
+    readonly CAPTURING_PHASE: 1 = 1;
+    readonly NONE: 0 = 0;
 
     constructor(type: string, options = { cancelable: true, bubbles: true, composed: false }) {
         const { cancelable, bubbles, composed } = { ...options };
@@ -50,7 +50,7 @@ export class Event2 {
         return !this.defaultPrevented;
     }
     get eventPhase() {
-        return this.target ? Event.AT_TARGET : Event.NONE;
+        return this.target ? Event2.AT_TARGET : Event2.NONE;
     }
     get cancelBubble() {
         return false;
