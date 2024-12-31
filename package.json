@@ -18,6 +18,7 @@
   "license": "MIT",
   "dependencies": {
     "@dead50f7/adbkit": "^2.11.5",
+    "adbkit": "^2.11.1",
     "express": "^4.21.2",
     "ios-device-lib": "^0.9.3",
     "node-mjpeg-proxy": "^0.3.2",

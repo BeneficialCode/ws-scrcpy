@@ -10,6 +10,12 @@
             "name": "Launch Chrome against localhost",
             "url": "http://localhost:8000",
             "webRoot": "${workspaceFolder}"
+        },
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "Attach to Program",
+            "port":9229
         }
     ]
 }
